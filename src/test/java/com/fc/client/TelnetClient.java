@@ -36,8 +36,8 @@ public class TelnetClient {
             for (;;) {
                 String[] command = new String[]{"http://123.123","GET"};
 
-                lastWriteFuture = ch.writeAndFlush(command[idx] + "\r\n");
-                Thread.sleep(1000);
+                lastWriteFuture = ch.writeAndFlush(command[idx] + "\n");
+                Thread.sleep(1);
                 idx = 1 - idx;
             }
 //

@@ -30,16 +30,16 @@ public class MongoQueueHandler extends SimpleChannelInboundHandler<String> {
             }else{
                 URL url = new URL(request, System.currentTimeMillis());
                 mongoQueue.enqueue(url);
-                response = "OK";
+                response = "OK\n";
             }
             pv.incrementAndGet();
             if(pv.get() % 100 == 0){
                 LOG.debug("pv is " + pv.get());
             }
-        }finally {
-            response = "ERROR";
+        }catch(Exception e){
+            response = "ERROR\n";
         }
-        ChannelFuture future = ctx.write(response);
+        ChannelFuture future = ctx.writeAndFlush(response);
     }
 
     @Override

@@ -14,6 +14,7 @@ public class TelnetClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, String msg) {
+        System.out.println(msg);
         LOG.debug(msg);
     }
 
