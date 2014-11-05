@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,8 +32,10 @@ public class MongoQueue implements Queue<URL>{
             Properties props = new Properties();
             props.load(is);
 
-            mongoClient = new MongoClient(props.getProperty("mongoHost"), Integer.parseInt(props.getProperty("mongoPort")));
+            MongoCredential credential = MongoCredential.createMongoCRCredential("test", "admin", "test".toCharArray());
+            mongoClient = new MongoClient(new ServerAddress( props.getProperty("mongoHost"), Integer.parseInt(props.getProperty("mongoPort"))), Arrays.asList(credential));
             DB db = mongoClient.getDB(props.getProperty("mongoDB"));
+            db.slaveOk();
             String prefix = props.getProperty("mongoPrefix");
             requestCollection = db.getCollection(prefix + "_request");
             dedupCollection = db.getCollection(prefix + "_dedup");
@@ -95,6 +98,11 @@ public class MongoQueue implements Queue<URL>{
             }
             deLock.unlock();
         }
+    }
+
+    @Override
+    public long len() {
+        return requestCollection.count();
     }
 
     public void close(){

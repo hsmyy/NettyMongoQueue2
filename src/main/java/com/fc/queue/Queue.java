@@ -6,4 +6,5 @@ package com.fc.queue;
 public interface Queue<R> {
     public void enqueue(R obj);
     public R dequeue();
+    public long len();
 }
