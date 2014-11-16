@@ -20,7 +20,7 @@ public abstract class TelnetProtocol {
             e.printStackTrace();
             response = ERROR;
         }
-        ChannelFuture future = ctx.writeAndFlush(response);
+        ChannelFuture future = ctx.writeAndFlush(response + DELIMIT);
     }
 
     protected abstract String process(String request);
