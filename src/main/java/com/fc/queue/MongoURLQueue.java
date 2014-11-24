@@ -6,12 +6,11 @@ import com.mongodb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -125,6 +124,6 @@ public class MongoURLQueue extends MongoAbstractQueue<URLRequest>{
         MessageDigest sha256 = MessageDigest.getInstance(MongoConst.SHA_256);
         byte[] passBytes = str.getBytes();
         byte[] passHash = sha256.digest(passBytes);
-        return Base64.getEncoder().encodeToString(passHash);
+        return DatatypeConverter.printBase64Binary(passHash);
     }
 }
