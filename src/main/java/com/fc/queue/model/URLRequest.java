@@ -1,4 +1,4 @@
-package com.fc.queue;
+package com.fc.queue.model;
 
 import com.mongodb.DBObject;
 import lombok.*;
@@ -13,19 +13,22 @@ import java.util.Base64;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class URL {
+public class URLRequest {
     private String url;
     private long timestamp;
 
     private String hash;
 
-    public URL(String url, long timestamp){
+//    private int status;
+
+
+    public URLRequest(String url, long timestamp){
         this.url = url;
         this.timestamp = timestamp;
-        this.hash = URL.hash(url);
+        this.hash = URLRequest.hash(url);
     }
 
-    public URL(DBObject obj){
+    public URLRequest(DBObject obj){
         this.url = (String)obj.get("url");
         this.timestamp = (Long)obj.get("timestamp");
         this.hash = (String)obj.get("hash");

@@ -1,5 +1,7 @@
 package com.fc.queue;
 
+import com.fc.queue.model.URLRequest;
+import com.google.inject.Singleton;
 import com.mongodb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by fc on 14-11-1.
  */
-public class MongoQueue implements Queue<URL>{
+@Singleton
+public class MongoQueue implements Queue<URLRequest>{
 
     private MongoClient mongoClient;
     private DBCollection requestCollection;
@@ -31,11 +34,17 @@ public class MongoQueue implements Queue<URL>{
         try(InputStream is = this.getClass().getResourceAsStream(MongoConst.NETTYMONGO_PROPERTIES)){
             Properties props = new Properties();
             props.load(is);
+            if(props.getProperty(MongoConst.MONGO_USER) != null && props.getProperty(MongoConst.MONGO_USER).length() > 0){
+                MongoCredential credential = MongoCredential.createMongoCRCredential(props.getProperty(MongoConst.MONGO_USER), MongoConst.ADMIN, props.getProperty(MongoConst.MONGO_PASSWORD).toCharArray());
+                mongoClient = new MongoClient(new ServerAddress( props.getProperty(MongoConst.MONGO_HOST), Integer.parseInt(props.getProperty(MongoConst.MONGO_PORT))), Arrays.asList(credential));
+                LOG.debug("credential: use");
+            }else{
+                mongoClient = new MongoClient(new ServerAddress( props.getProperty(MongoConst.MONGO_HOST), Integer.parseInt(props.getProperty(MongoConst.MONGO_PORT))));
+                LOG.debug("credential: not use");
+            }
 
-            MongoCredential credential = MongoCredential.createMongoCRCredential(props.getProperty(MongoConst.MONGO_USER), MongoConst.ADMIN, props.getProperty(MongoConst.MONGO_PASSWORD).toCharArray());
-            mongoClient = new MongoClient(new ServerAddress( props.getProperty(MongoConst.MONGO_HOST), Integer.parseInt(props.getProperty(MongoConst.MONGO_PORT))), Arrays.asList(credential));
             DB db = mongoClient.getDB(props.getProperty(MongoConst.MONGO_DB));
-            LOG.debug("use db" + props.getProperty(MongoConst.MONGO_DB));
+            LOG.debug("use db: " + props.getProperty(MongoConst.MONGO_DB));
             db.slaveOk();
             String prefix = props.getProperty(MongoConst.MONGO_PREFIX);
             requestCollection = db.getCollection(prefix + MongoConst.REQUEST);
@@ -46,7 +55,7 @@ public class MongoQueue implements Queue<URL>{
     }
 
     @Override
-    public void enqueue(URL obj) {
+    public void enqueue(URLRequest obj) {
         DBCursor cursor = null;
         try {
             enLock.lock();
@@ -67,30 +76,30 @@ public class MongoQueue implements Queue<URL>{
     }
 
     @Override
-    public URL dequeue() {
+    public URLRequest dequeue() {
         DBCursor cursor = null;
         deLock.lock();
         try{
             cursor = requestCollection.find().sort(new BasicDBObject().append(MongoConst.TIMESTAMP,1)).limit(1);
             if(cursor.count() > 0){
                 DBObject obj = cursor.next();
-                URL url = new URL(obj);
-                WriteResult result = requestCollection.remove(new BasicDBObject().append(MongoConst.URL, url.getUrl()));
+                URLRequest urlRequest = new URLRequest(obj);
+                WriteResult result = requestCollection.remove(new BasicDBObject().append(MongoConst.URL, urlRequest.getUrl()));
                 if(result.getN() == 0){
-                    LOG.warn("[DEQUEUE] url["+ url.getUrl()+ "] remove but no effect");
+                    LOG.warn("[DEQUEUE] url["+ urlRequest.getUrl()+ "] remove but no effect");
                 }
-                if(url.getHash() == null || url.getHash().length() == 0){
+                if(urlRequest.getHash() == null || urlRequest.getHash().length() == 0){
                     try {
-                        url.setHash(hash(url.getUrl()));
+                        urlRequest.setHash(hash(urlRequest.getUrl()));
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
                 }
-                result = dedupCollection.insert(new BasicDBObject().append(MongoConst.URL, url.getUrl()).append(MongoConst.TIMESTAMP,url.getTimestamp()).append(MongoConst.HASH, url.getHash()));
+                result = dedupCollection.insert(new BasicDBObject().append(MongoConst.URL, urlRequest.getUrl()).append(MongoConst.TIMESTAMP, urlRequest.getTimestamp()).append(MongoConst.HASH, urlRequest.getHash()));
                 if(result.getN() == 0){
-                    LOG.warn("[DEQUEUE] url["+ url.getUrl()+ "] add dedup but no effect");
+                    LOG.warn("[DEQUEUE] url["+ urlRequest.getUrl()+ "] add dedup but no effect");
                 }
-                return url;
+                return urlRequest;
             }
             return null;
         } finally {

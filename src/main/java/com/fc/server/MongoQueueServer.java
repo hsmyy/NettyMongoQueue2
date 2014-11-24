@@ -13,7 +13,7 @@ import io.netty.handler.logging.LoggingHandler;
  */
 public class MongoQueueServer  {
 
-    static final int PORT = 10086;
+    static final int PORT = 10087;
     public static void  main(String[] args){
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();

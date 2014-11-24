@@ -1,14 +1,11 @@
 package com.fc.server;
 
-import com.fc.queue.MongoQueue;
-import com.fc.queue.URL;
 import com.fc.server.protocol.MongoQueueProtocol;
 import com.fc.server.protocol.TelnetProtocol;
+import com.fc.util.GuiceDI;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by fc on 14-11-1.
@@ -20,9 +17,8 @@ public class MongoQueueHandler extends SimpleChannelInboundHandler<String> {
 
     private Logger LOG = LoggerFactory.getLogger(MongoQueueHandler.class);
 
-    private TelnetProtocol protocol = new MongoQueueProtocol();
+    private TelnetProtocol protocol = GuiceDI.injector.getInstance(TelnetProtocol.class);
 
-    @Override
     public void messageReceived(ChannelHandlerContext ctx, String request) {
        protocol.answer(ctx, request);
     }

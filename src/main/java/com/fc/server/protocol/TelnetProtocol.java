@@ -1,13 +1,12 @@
 package com.fc.server.protocol;
 
-import com.fc.queue.URL;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
  * Created by fc on 14-11-13.
  */
-public abstract class TelnetProtocol {
+public abstract class TelnetProtocol implements OneSideProtocol{
 
     public static final String DELIMIT = "\r\n";
     private static final String ERROR = "ERROR" + DELIMIT;
