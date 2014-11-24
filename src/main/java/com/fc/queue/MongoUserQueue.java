@@ -40,7 +40,7 @@ public class MongoUserQueue extends MongoAbstractQueue<User>{
 
     @Override
     public void enqueue(User obj) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
