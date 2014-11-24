@@ -1,6 +1,6 @@
 package com.fc.server.protocol;
 
-import com.fc.queue.MongoQueue;
+import com.fc.queue.MongoURLQueue;
 import com.fc.queue.Queue;
 import com.fc.queue.model.URLRequest;
 import com.google.inject.Inject;
@@ -49,7 +49,7 @@ public class MongoQueueProtocol extends TelnetProtocol{
     }
 
     @Inject
-    public void setMongoQueue(MongoQueue mongoQueue) {
+    public void setMongoQueue(MongoURLQueue mongoQueue) {
         this.mongoQueue = mongoQueue;
     }
 }
